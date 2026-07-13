@@ -6,6 +6,8 @@
 //   - 소득 배지·하단 배치
 // 타입은 Supabase 테이블 행(snake_case)을 그대로 받도록 맞춤.
 
+import { supabase } from './supabase';
+
 // 기준일 고정(freeze): 마감 여부·나이 계산 등 "오늘"이 필요한 곳은 실제 시스템 날짜(new Date()) 대신
 // 이 상수를 사용한다. (CLAUDE.md "기준일 고정" 규칙)
 export const REFERENCE_DATE = '2026-08-15';
@@ -258,4 +260,14 @@ export function isExpired(
 ): boolean {
   if (policy.deadline_type === '상시' || !policy.deadline) return false;
   return policy.deadline < referenceDate; // 'YYYY-MM-DD' 문자열 비교
+}
+
+// ------------------------------------------------------------------
+// Supabase policies 테이블 조회 → 매칭 대상 전체 정책.
+//   (매칭은 실시간 외부 API가 아니라 배치 동기화로 채워진 우리 DB 기준으로 실행)
+// ------------------------------------------------------------------
+export async function getPolicies(): Promise<Policy[]> {
+  const { data, error } = await supabase.from('policies').select('*');
+  if (error) throw new Error(`정책 조회 실패: ${error.message}`);
+  return (data ?? []) as Policy[];
 }
