@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 type Mode = 'login' | 'signup';
@@ -13,6 +14,14 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<Message>(null);
+  const router = useRouter();
+
+  // 이미 로그인된 상태면 홈으로 보낸다.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) router.replace('/home');
+    });
+  }, [router]);
 
   const isSignup = mode === 'signup';
 
@@ -42,7 +51,7 @@ export default function LoginPage() {
         if (error) {
           setMessage({ type: 'error', text: error.message });
         } else if (data.session) {
-          setMessage({ type: 'success', text: '회원가입이 완료됐어요! 바로 이용할 수 있어요.' });
+          router.push('/home');
         } else {
           setMessage({
             type: 'info',
@@ -50,14 +59,11 @@ export default function LoginPage() {
           });
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setMessage({ type: 'error', text: '이메일 또는 비밀번호를 다시 확인해 주세요.' });
         } else {
-          setMessage({
-            type: 'success',
-            text: `환영합니다! ${data.user?.email ?? ''} 님으로 로그인됐어요.`,
-          });
+          router.push('/home');
         }
       }
     } catch (err) {
