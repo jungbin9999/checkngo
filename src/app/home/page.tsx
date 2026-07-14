@@ -273,8 +273,9 @@ function PolicyCard({ result, pending }: { result: MatchResult; pending?: boolea
   const badge = result.incomeBadge;
 
   return (
-    <div
-      className={`flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md ${
+    <Link
+      href={`/policy/${p.policy_id}`}
+      className={`flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-indigo-200 ${
         expired ? 'opacity-60' : ''
       }`}
     >
@@ -303,16 +304,9 @@ function PolicyCard({ result, pending }: { result: MatchResult; pending?: boolea
 
       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
         <span className="text-xs text-slate-400">필요서류 {p.required_documents.length}개</span>
-        <a
-          href={p.apply_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
-        >
-          신청하러 가기 →
-        </a>
+        <span className="text-sm font-semibold text-indigo-600">자세히 →</span>
       </div>
-    </div>
+    </Link>
   );
 }
 
