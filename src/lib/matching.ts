@@ -194,11 +194,21 @@ function defaultSortWeight(r: MatchResult): number {
 }
 
 // ------------------------------------------------------------------
-// 기본순 정렬: 배지 없는 정확 매칭 → 소득 모름/경계 배지 → 소득 초과 강경고(하단).
-// 동일 가중치 내에서는 원래 순서를 유지(안정 정렬).
+// 기본순 정렬:
+//   1차 기준 = 마감 여부. 마감된 정책은 배지 상태와 무관하게 항상 최하단(SPEC 2-3).
+//   2차 기준 = 배지 없는 정확 매칭 → 소득 모름/경계 배지 → 소득 초과 강경고.
+//   동일 조건 내에서는 원래 순서를 유지(안정 정렬).
 // ------------------------------------------------------------------
-export function sortByDefault(results: MatchResult[]): MatchResult[] {
-  return [...results].sort((a, b) => defaultSortWeight(a) - defaultSortWeight(b));
+export function sortByDefault(
+  results: MatchResult[],
+  referenceDate: string = REFERENCE_DATE,
+): MatchResult[] {
+  return [...results].sort((a, b) => {
+    const expiredA = isExpired(a.policy, referenceDate) ? 1 : 0;
+    const expiredB = isExpired(b.policy, referenceDate) ? 1 : 0;
+    if (expiredA !== expiredB) return expiredA - expiredB;
+    return defaultSortWeight(a) - defaultSortWeight(b);
+  });
 }
 
 // ------------------------------------------------------------------
@@ -237,7 +247,10 @@ export function matchPolicies(
   referenceDate: string = REFERENCE_DATE,
 ): MatchGroups {
   const results = policies.map((p) => matchPolicy(user, p, referenceDate));
-  const matched = sortByDefault(results.filter((r) => r.status === 'matched'));
+  const matched = sortByDefault(
+    results.filter((r) => r.status === 'matched'),
+    referenceDate,
+  );
   const pendingRegion = results.filter((r) => r.status === 'pending_region');
   const excluded = results.filter((r) => r.status === 'excluded');
   return { matched, pendingRegion, excluded };

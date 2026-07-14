@@ -9,6 +9,7 @@ import {
   matchPolicies,
   sortByDeadline,
   sortByDefault,
+  computeAgeRange,
   isExpired,
   REFERENCE_DATE,
   type Policy,
@@ -89,6 +90,20 @@ export default function HomePage() {
     const sorted = sort === 'deadline' ? sortByDeadline(base) : sortByDefault(base);
     return { items: sorted, pending: pend };
   }, [personalized, profile, policies, sort]);
+
+  // 현재 적용된 필터 조건 칩 (읽기 전용, 클릭 시 프로필 수정으로 이동)
+  const chipLabels =
+    personalized && profile
+      ? [
+          computeAgeRange(profile.birth_date)
+            ? `${computeAgeRange(profile.birth_date)}세`
+            : '만 19~39세 외',
+          profile.employment_status,
+          displayIncome(profile.income_level),
+          profile.housing_type,
+          profile.region,
+        ]
+      : [];
 
   if (checking) {
     return (
@@ -180,6 +195,28 @@ export default function HomePage() {
               className="inline-flex shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:from-violet-700 hover:to-indigo-700"
             >
               프로필 입력하기
+            </Link>
+          </div>
+        )}
+
+        {/* 현재 적용된 필터 조건 칩 (전체보기 상태에선 숨김) */}
+        {personalized && !loadingData && policies.length > 0 && chipLabels.length > 0 && (
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-slate-400">내 조건</span>
+            {chipLabels.map((label, i) => (
+              <Link
+                key={i}
+                href="/profile"
+                className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:text-indigo-600 hover:ring-indigo-300"
+              >
+                {label}
+              </Link>
+            ))}
+            <Link
+              href="/profile"
+              className="ml-1 text-xs font-medium text-indigo-500 hover:text-indigo-600"
+            >
+              필터 수정
             </Link>
           </div>
         )}
@@ -332,6 +369,23 @@ function daysBetween(fromStr: string, toStr: string): number {
   const from = new Date(`${fromStr}T00:00:00`).getTime();
   const to = new Date(`${toStr}T00:00:00`).getTime();
   return Math.round((to - from) / 86_400_000);
+}
+
+function displayIncome(level: string): string {
+  switch (level) {
+    case '100만원미만':
+      return '100만원 미만';
+    case '100~200':
+      return '100~200만원';
+    case '200~300':
+      return '200~300만원';
+    case '300초과':
+      return '300만원 초과';
+    case '모름':
+      return '소득 모름';
+    default:
+      return level;
+  }
 }
 
 function categoryChip(category: Policy['category']): string {
