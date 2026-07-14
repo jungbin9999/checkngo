@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Logo } from '@/components/Logo';
+import { Header } from '@/components/Header';
 import { isExpired, REFERENCE_DATE, type Policy } from '@/lib/matching';
 
 type ScrapStatus = '진행중' | '신청완료';
@@ -100,36 +100,9 @@ export default function MyPage() {
     }
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/login');
-  }
-
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="fixed inset-x-0 top-0 z-20 h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-sky-500" />
-
-      <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link href="/home" className="flex items-center">
-            <Logo className="h-10 w-auto" priority />
-          </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/home"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-            >
-              홈
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              로그아웃
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* 프로필 요약 */}

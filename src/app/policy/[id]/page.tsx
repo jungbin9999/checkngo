@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { Header } from '@/components/Header';
 import { isExpired, REFERENCE_DATE, type Policy } from '@/lib/matching';
 
 export default function PolicyDetailPage() {
@@ -134,20 +135,32 @@ export default function PolicyDetailPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="fixed inset-x-0 top-0 z-20 h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-sky-500" />
+      <Header />
 
-      <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-          <Link
-            href="/home"
-            className="text-sm font-medium text-slate-500 transition hover:text-slate-800"
-          >
-            ← 홈
-          </Link>
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                  policy.category === '국가단위'
+                    ? 'bg-sky-50 text-sky-700'
+                    : 'bg-violet-50 text-violet-700'
+                }`}
+              >
+                {policy.category}
+              </span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                {deadlineText(policy)}
+              </span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{policy.title}</h1>
+            <p className="mt-1 text-sm text-slate-400">출처 · {policy.source}</p>
+          </div>
           <button
             onClick={toggleScrap}
             disabled={busy}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition disabled:opacity-60 ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition disabled:opacity-60 ${
               scrapped
                 ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm'
                 : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -157,26 +170,6 @@ export default function PolicyDetailPage() {
             {scrapped ? '스크랩됨' : '스크랩'}
           </button>
         </div>
-      </header>
-
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        {/* 헤더 */}
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-              policy.category === '국가단위'
-                ? 'bg-sky-50 text-sky-700'
-                : 'bg-violet-50 text-violet-700'
-            }`}
-          >
-            {policy.category}
-          </span>
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-            {deadlineText(policy)}
-          </span>
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{policy.title}</h1>
-        <p className="mt-1 text-sm text-slate-400">출처 · {policy.source}</p>
 
         {message && (
           <div className="mt-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{message}</div>

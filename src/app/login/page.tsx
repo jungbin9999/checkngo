@@ -40,6 +40,10 @@ export default function LoginPage() {
       setMessage({ type: 'error', text: '이메일과 비밀번호를 모두 입력해 주세요.' });
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setMessage({ type: 'error', text: '올바른 이메일을 입력하세요.' });
+      return;
+    }
     if (isSignup && password.length < 6) {
       setMessage({ type: 'error', text: '비밀번호는 6자 이상이어야 해요.' });
       return;

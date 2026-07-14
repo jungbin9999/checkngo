@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Logo } from '@/components/Logo';
+import { Header } from '@/components/Header';
 import {
   getPolicies,
   matchPolicies,
@@ -25,7 +25,6 @@ export default function HomePage() {
   const [checking, setChecking] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [sort, setSort] = useState<SortMode>('default');
@@ -43,7 +42,6 @@ export default function HomePage() {
         return;
       }
       if (!active) return;
-      setEmail(session.user.email ?? '');
       setChecking(false);
 
       try {
@@ -64,11 +62,6 @@ export default function HomePage() {
       active = false;
     };
   }, [router]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/login');
-  }
 
   const personalized = profile !== null && !showAll;
 
@@ -116,36 +109,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="fixed inset-x-0 top-0 z-20 h-1 bg-gradient-to-r from-violet-500 via-indigo-500 to-sky-500" />
-
-      {/* 상단 네비 */}
-      <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Logo className="h-10 w-auto" priority />
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
-            <Link
-              href="/mypage"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-            >
-              마이페이지
-            </Link>
-            <Link
-              href="/profile"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-            >
-              프로필
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              로그아웃
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="mx-auto max-w-5xl px-4 py-8">
         {/* 타이틀 + 컨트롤 */}
