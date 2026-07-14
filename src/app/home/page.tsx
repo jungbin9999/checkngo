@@ -129,6 +129,12 @@ export default function HomePage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
             <Link
+              href="/mypage"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+            >
+              마이페이지
+            </Link>
+            <Link
               href="/profile"
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
             >
