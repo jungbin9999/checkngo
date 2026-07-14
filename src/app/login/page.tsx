@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Logo } from '@/components/Logo';
 
 type Mode = 'login' | 'signup';
 type Message = { type: 'success' | 'error' | 'info'; text: string } | null;
@@ -84,11 +85,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* 브랜드 */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-indigo-500/30">
-            <CheckIcon className="h-7 w-7 text-white" />
-          </div>
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">체크앤고</h1>
-          <p className="mt-1 text-sm text-slate-500">내 조건에 맞는 청년 정책, 한 번에 매칭</p>
+          <Logo className="h-20 w-auto" priority />
+          <p className="mt-3 text-sm text-slate-500">청년 지원 정책 서비스</p>
         </div>
 
         {/* 카드 */}
@@ -194,19 +192,3 @@ export default function LoginPage() {
   );
 }
 
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M4 12.5 9.5 18 20 6.5" />
-    </svg>
-  );
-}

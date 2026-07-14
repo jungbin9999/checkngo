@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { Logo } from '@/components/Logo';
 import { isExpired, REFERENCE_DATE, type Policy } from '@/lib/matching';
 
 type ScrapStatus = '진행중' | '신청완료';
@@ -110,11 +111,8 @@ export default function MyPage() {
 
       <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link href="/home" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600">
-              <CheckIcon className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold text-slate-900">체크앤고</span>
+          <Link href="/home" className="flex items-center">
+            <Logo className="h-10 w-auto" priority />
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
@@ -269,23 +267,6 @@ function ScrapCard({
         </button>
       </div>
     </li>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M4 12.5 9.5 18 20 6.5" />
-    </svg>
   );
 }
 

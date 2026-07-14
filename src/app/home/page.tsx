@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { Logo } from '@/components/Logo';
 import {
   getPolicies,
   matchPolicies,
@@ -120,12 +121,8 @@ export default function HomePage() {
       {/* 상단 네비 */}
       <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600">
-              <CheckIcon className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold text-slate-900">체크앤고</span>
-          </div>
+          <Logo className="h-10 w-auto" priority />
+
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="hidden text-sm text-slate-500 sm:inline">{email}</span>
             <Link
@@ -332,23 +329,6 @@ function EmptyState({ title, desc }: { title: string; desc: string }) {
       <p className="text-base font-semibold text-slate-700">{title}</p>
       <p className="mt-2 text-sm text-slate-400">{desc}</p>
     </div>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M4 12.5 9.5 18 20 6.5" />
-    </svg>
   );
 }
 

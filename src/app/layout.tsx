@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "체크앤고 — 청년 정책 매칭",
+  title: "check&go — 청년 지원 정책 서비스",
   description: "내 조건에 맞는 청년 정책을 한 번에 매칭하고 서류·마감까지 챙겨주는 서비스",
 };
 
