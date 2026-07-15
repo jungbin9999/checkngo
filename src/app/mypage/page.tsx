@@ -14,12 +14,14 @@ interface ScrapRow {
   policy_id: string;
   status: ScrapStatus;
   checklist_status: Record<string, boolean> | null;
+  notification_on: boolean;
   policy: Policy | null;
 }
 
 export default function MyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
   const [scraps, setScraps] = useState<ScrapRow[]>([]);
   const [message, setMessage] = useState<string | null>(null);
@@ -35,11 +37,12 @@ export default function MyPage() {
         return;
       }
       if (!active) return;
+      setUserId(session.user.id);
       setEmail(session.user.email ?? '');
 
       const { data, error } = await supabase
         .from('scraps')
-        .select('scrap_id, policy_id, status, checklist_status, policies(*)')
+        .select('scrap_id, policy_id, status, checklist_status, notification_on, policies(*)')
         .eq('user_id', session.user.id)
         .order('scrapped_at', { ascending: false });
 
@@ -54,6 +57,7 @@ export default function MyPage() {
               policy_id: string;
               status: ScrapStatus;
               checklist_status: Record<string, boolean> | null;
+              notification_on: boolean;
               policies: Policy | Policy[] | null;
             };
             const policy = Array.isArray(raw.policies) ? (raw.policies[0] ?? null) : raw.policies;
@@ -62,6 +66,7 @@ export default function MyPage() {
               policy_id: raw.policy_id,
               status: raw.status,
               checklist_status: raw.checklist_status,
+              notification_on: raw.notification_on,
               policy,
             };
           }),
@@ -82,7 +87,6 @@ export default function MyPage() {
       .update({ status: next })
       .eq('scrap_id', scrap.scrap_id);
     if (error) {
-      // 롤백
       setScraps((prev) =>
         prev.map((s) => (s.scrap_id === scrap.scrap_id ? { ...s, status: scrap.status } : s)),
       );
@@ -99,6 +103,44 @@ export default function MyPage() {
       setMessage('삭제에 실패했어요.');
     }
   }
+
+  // 개별 알림 on/off (2-7)
+  async function toggleNotification(scrap: ScrapRow) {
+    const next = !scrap.notification_on;
+    setScraps((prev) =>
+      prev.map((s) => (s.scrap_id === scrap.scrap_id ? { ...s, notification_on: next } : s)),
+    );
+    const { error } = await supabase
+      .from('scraps')
+      .update({ notification_on: next })
+      .eq('scrap_id', scrap.scrap_id);
+    if (error) {
+      setScraps((prev) =>
+        prev.map((s) =>
+          s.scrap_id === scrap.scrap_id ? { ...s, notification_on: scrap.notification_on } : s,
+        ),
+      );
+      setMessage('알림 설정 변경에 실패했어요.');
+    }
+  }
+
+  // 전체 알림 on/off — 현재 사용자의 모든 scraps.notification_on 일괄 변경 (2-8)
+  async function toggleAllNotifications(target: boolean) {
+    const prev = scraps;
+    setScraps((cur) => cur.map((s) => ({ ...s, notification_on: target })));
+    const { error } = await supabase
+      .from('scraps')
+      .update({ notification_on: target })
+      .eq('user_id', userId);
+    if (error) {
+      setScraps(prev);
+      setMessage('전체 알림 설정 변경에 실패했어요.');
+    }
+  }
+
+  // 마감 알림이 의미 있는(상시 아님) 스크랩 기준으로 전체 스위치 상태 결정
+  const datableScraps = scraps.filter((s) => s.policy && s.policy.deadline_type !== '상시');
+  const allNotiOn = datableScraps.length > 0 && datableScraps.every((s) => s.notification_on);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -118,6 +160,23 @@ export default function MyPage() {
             프로필 수정
           </Link>
         </div>
+
+        {/* 전체 알림 설정 (2-8) */}
+        {!loading && scraps.length > 0 && (
+          <div className="mb-6 flex items-center justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+            <div className="pr-4">
+              <p className="text-sm font-semibold text-slate-900">마감 알림</p>
+              <p className="mt-0.5 text-xs text-slate-400">
+                마감 7·1일 전 기준. 상시 접수 정책은 마감 알림이 없어요. (이 데모에선 실제 이메일 발송은 생략)
+              </p>
+            </div>
+            <Switch
+              on={allNotiOn}
+              disabled={datableScraps.length === 0}
+              onClick={() => toggleAllNotifications(!allNotiOn)}
+            />
+          </div>
+        )}
 
         <div className="mb-4 flex items-end justify-between">
           <h1 className="text-xl font-bold tracking-tight text-slate-900">스크랩한 정책</h1>
@@ -155,6 +214,7 @@ export default function MyPage() {
                 scrap={scrap}
                 onToggleDone={() => toggleDone(scrap)}
                 onRemove={() => removeScrap(scrap)}
+                onToggleNotification={() => toggleNotification(scrap)}
               />
             ))}
           </ul>
@@ -168,15 +228,18 @@ function ScrapCard({
   scrap,
   onToggleDone,
   onRemove,
+  onToggleNotification,
 }: {
   scrap: ScrapRow;
   onToggleDone: () => void;
   onRemove: () => void;
+  onToggleNotification: () => void;
 }) {
   const policy = scrap.policy;
   if (!policy) return null;
 
   const expired = isExpired(policy);
+  const isStanding = policy.deadline_type === '상시';
   const total = policy.required_documents.length;
   const done = policy.required_documents.filter((d) => scrap.checklist_status?.[d]).length;
   const isDone = scrap.status === '신청완료';
@@ -185,17 +248,42 @@ function ScrapCard({
     <li
       className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 ${expired ? 'opacity-70' : ''}`}
     >
-      <div className="mb-2 flex items-center gap-2">
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-          {deadlineText(policy)}
-        </span>
-        <span
-          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-            isDone ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'
-          }`}
-        >
-          {scrap.status}
-        </span>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+            {deadlineText(policy)}
+          </span>
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+              isDone ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'
+            }`}
+          >
+            {scrap.status}
+          </span>
+        </div>
+
+        {/* 개별 알림 토글 (상시형은 마감 알림이 없어 비활성) */}
+        {isStanding ? (
+          <span
+            className="flex items-center gap-1 text-xs text-slate-300"
+            title="상시 접수라 마감 알림이 없어요"
+          >
+            <BellIcon on={false} className="h-4 w-4" /> 상시
+          </span>
+        ) : (
+          <button
+            onClick={onToggleNotification}
+            aria-label={scrap.notification_on ? '알림 끄기' : '알림 켜기'}
+            className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition ${
+              scrap.notification_on
+                ? 'text-indigo-600 hover:bg-indigo-50'
+                : 'text-slate-400 hover:bg-slate-100'
+            }`}
+          >
+            <BellIcon on={scrap.notification_on} className="h-4 w-4" />
+            {scrap.notification_on ? '알림 켜짐' : '알림 꺼짐'}
+          </button>
+        )}
       </div>
 
       <Link href={`/policy/${policy.policy_id}`} className="block">
@@ -240,6 +328,53 @@ function ScrapCard({
         </button>
       </div>
     </li>
+  );
+}
+
+function Switch({
+  on,
+  disabled,
+  onClick,
+}: {
+  on: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      disabled={disabled}
+      onClick={onClick}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-40 ${
+        on ? 'bg-indigo-600' : 'bg-slate-200'
+      }`}
+    >
+      <span
+        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+          on ? 'translate-x-5' : 'translate-x-0.5'
+        }`}
+      />
+    </button>
+  );
+}
+
+function BellIcon({ on, className }: { on: boolean; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={on ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
   );
 }
 
