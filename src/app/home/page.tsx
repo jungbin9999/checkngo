@@ -52,8 +52,8 @@ export default function HomePage() {
         if (!active) return;
         setPolicies(pols);
         setProfile((profRes.data as UserProfile | null) ?? null);
-      } catch (e) {
-        if (active) setError(e instanceof Error ? e.message : '데이터를 불러오지 못했어요.');
+      } catch {
+        if (active) setError('정책 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
       } finally {
         if (active) setLoadingData(false);
       }

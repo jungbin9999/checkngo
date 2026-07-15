@@ -55,8 +55,8 @@ export default function CalendarPage() {
         setScrapped(
           new Set(((scrapRes.data as { policy_id: string }[] | null) ?? []).map((s) => s.policy_id)),
         );
-      } catch (e) {
-        if (active) setError(e instanceof Error ? e.message : '데이터를 불러오지 못했어요.');
+      } catch {
+        if (active) setError('데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
       } finally {
         if (active) setLoading(false);
       }

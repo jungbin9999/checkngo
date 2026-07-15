@@ -41,11 +41,11 @@ export function Header() {
       <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link href="/home" aria-label="홈으로" className="flex items-center">
-            <Logo className="h-9 w-auto" priority />
+            <Logo className="h-7 w-auto sm:h-9" priority />
           </Link>
 
           {ready && email && (
-            <nav className="flex items-center gap-1 sm:gap-2">
+            <nav className="flex items-center gap-0.5 sm:gap-2">
               <span className="mr-1 hidden max-w-[180px] truncate text-sm text-slate-500 sm:inline">
                 {email}
               </span>
@@ -54,7 +54,7 @@ export function Header() {
               <HeaderLink href="/calendar">캘린더</HeaderLink>
               <button
                 onClick={handleLogout}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 sm:px-3 sm:text-sm"
               >
                 로그아웃
               </button>
@@ -70,7 +70,7 @@ function HeaderLink({ href, children }: { href: string; children: React.ReactNod
   return (
     <Link
       href={href}
-      className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+      className="rounded-lg px-2 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 sm:px-2.5 sm:text-sm"
     >
       {children}
     </Link>

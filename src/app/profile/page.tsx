@@ -113,7 +113,7 @@ export default function ProfilePage() {
     setSaving(false);
 
     if (upsertError) {
-      setError(upsertError.message);
+      setError('저장에 실패했어요. 잠시 후 다시 시도해 주세요.');
       return;
     }
     router.push('/home');
