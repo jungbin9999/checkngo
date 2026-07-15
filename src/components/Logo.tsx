@@ -4,9 +4,9 @@ import Image from 'next/image';
 export function Logo({ className, priority = false }: { className?: string; priority?: boolean }) {
   return (
     <Image
-      src="/logo-v2.png"
+      src="/logo-v3.png"
       alt="check&go"
-      width={2634}
+      width={1982}
       height={560}
       priority={priority}
       className={className}
