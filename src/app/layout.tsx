@@ -13,8 +13,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://checkngo.vercel.app"),
   title: "check&go — 청년 지원 정책 서비스",
   description: "내 조건에 맞는 청년 정책을 한 번에 매칭하고 서류·마감까지 챙겨주는 서비스",
+  openGraph: {
+    title: "check&go — 청년 지원 정책 서비스",
+    description:
+      "내 조건(나이·취업·소득·주거·지역)에 맞는 청년 정책을 한 번에 매칭. 서류 체크리스트·마감 캘린더까지.",
+    url: "https://checkngo.vercel.app",
+    siteName: "check&go",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "check&go — 청년 지원 정책 서비스",
+    description: "내 조건에 맞는 청년 정책을 한 번에 매칭. 서류 체크리스트·마감 캘린더까지.",
+  },
 };
 
 export default function RootLayout({
