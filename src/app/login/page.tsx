@@ -8,6 +8,10 @@ import { Logo } from '@/components/Logo';
 type Mode = 'login' | 'signup';
 type Message = { type: 'success' | 'error' | 'info'; text: string } | null;
 
+// 회원가입 없이 둘러보기용 공개 데모 계정 (프로필·스크랩이 미리 세팅됨)
+const DEMO_EMAIL = 'demo@checkngo.app';
+const DEMO_PASSWORD = 'demo1234';
+
 export default function LoginPage() {
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -78,6 +82,22 @@ export default function LoginPage() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDemo() {
+    if (loading) return;
+    setMessage(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+    });
+    if (error) {
+      setLoading(false);
+      setMessage({ type: 'error', text: '데모 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.' });
+    } else {
+      router.push('/home');
     }
   }
 
@@ -175,6 +195,22 @@ export default function LoginPage() {
               {loading ? '처리 중…' : isSignup ? '회원가입' : '로그인'}
             </button>
           </form>
+
+          <div className="my-5 flex items-center gap-3 text-xs text-slate-300">
+            <span className="h-px flex-1 bg-slate-100" />
+            또는
+            <span className="h-px flex-1 bg-slate-100" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDemo}
+            disabled={loading}
+            className="w-full rounded-xl border border-indigo-200 bg-indigo-50/50 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            데모 계정으로 둘러보기
+          </button>
+          <p className="mt-2 text-center text-xs text-slate-400">회원가입 없이 바로 체험할 수 있어요</p>
 
           <p className="mt-6 text-center text-xs text-slate-400">
             {isSignup ? '이미 계정이 있으신가요? ' : '아직 계정이 없으신가요? '}
