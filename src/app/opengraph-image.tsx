@@ -94,12 +94,14 @@ export default function OpengraphImage() {
             width: 700,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
-            padding: '74px 62px',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            gap: 40,
+            padding: '0 62px',
           }}
         >
           <img src={LOGO_SRC} width={300} height={85} alt="check&go" />
-          <div style={{ display: 'flex', flexDirection: 'column', fontSize: 62, fontWeight: 700, letterSpacing: -2, lineHeight: 1.16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', fontSize: 54, fontWeight: 700, letterSpacing: -2, lineHeight: 1.18 }}>
             <span>내 조건에 맞는</span>
             <span>청년 정책,</span>
             <span>한눈에 확인하기</span>
