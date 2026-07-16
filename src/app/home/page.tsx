@@ -112,6 +112,15 @@ export default function HomePage() {
       <Header />
 
       <div className="mx-auto max-w-5xl px-4 py-8">
+        {/* 데이터 기준일 안내 (데모) */}
+        <div className="mb-5 flex items-center gap-2 rounded-xl bg-indigo-50/70 px-4 py-2.5 text-xs text-indigo-600">
+          <span aria-hidden>📌</span>
+          <span>
+            <b className="font-semibold">2026.08.15 기준</b>의 포트폴리오 데모예요. 마감·D-day도 이 날짜
+            기준으로 표시됩니다.
+          </span>
+        </div>
+
         {/* 타이틀 + 컨트롤 */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -223,10 +232,6 @@ export default function HomePage() {
             </div>
           </section>
         )}
-
-        <p className="mt-12 text-center text-xs text-slate-400">
-          2026년 8월 15일 데이터 기준의 포트폴리오 데모입니다.
-        </p>
       </div>
     </main>
   );

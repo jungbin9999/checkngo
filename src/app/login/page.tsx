@@ -110,7 +110,7 @@ export default function LoginPage() {
         {/* 브랜드 */}
         <div className="mb-8 flex flex-col items-center text-center">
           <Logo className="h-20 w-auto" priority />
-          <p className="mt-3 text-sm text-slate-500">청년 지원 정책 서비스</p>
+          <p className="mt-3 text-sm text-slate-500">내 조건에 맞는 청년 정책을 한 번에 매칭해드려요</p>
         </div>
 
         {/* 카드 */}
@@ -206,11 +206,11 @@ export default function LoginPage() {
             type="button"
             onClick={handleDemo}
             disabled={loading}
-            className="w-full rounded-xl border border-indigo-200 bg-indigo-50/50 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-indigo-50 py-3.5 text-sm font-semibold text-indigo-600 ring-1 ring-indigo-200 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            데모 계정으로 둘러보기
+            데모 계정으로 바로 둘러보기
           </button>
-          <p className="mt-2 text-center text-xs text-slate-400">회원가입 없이 바로 체험할 수 있어요</p>
+          <p className="mt-2 text-center text-xs text-slate-400">회원가입 없이 클릭 한 번으로 체험할 수 있어요</p>
 
           <p className="mt-6 text-center text-xs text-slate-400">
             {isSignup ? '이미 계정이 있으신가요? ' : '아직 계정이 없으신가요? '}
