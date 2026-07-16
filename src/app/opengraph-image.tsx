@@ -100,7 +100,8 @@ export default function OpengraphImage() {
             padding: '0 62px',
           }}
         >
-          <img src={LOGO_SRC} width={300} height={85} alt="check&go" />
+          {/* 로고 PNG에 왼쪽 투명여백(~14.5px)이 있어 글자 시작점을 텍스트와 맞추려고 왼쪽으로 당김 */}
+          <img src={LOGO_SRC} width={300} height={85} alt="check&go" style={{ marginLeft: -14 }} />
           <div style={{ display: 'flex', flexDirection: 'column', fontSize: 54, fontWeight: 700, letterSpacing: -2, lineHeight: 1.18 }}>
             <span>내 조건에 맞는</span>
             <span>청년 정책,</span>
