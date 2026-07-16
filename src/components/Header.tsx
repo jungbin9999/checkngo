@@ -62,6 +62,11 @@ export function Header() {
           )}
         </div>
       </header>
+      {email === 'demo@checkngo.app' && (
+        <div className="bg-amber-50 px-4 py-1.5 text-center text-[11px] text-amber-700">
+          데모 체험 중 · 공용 데모 계정이라 프로필·스크랩이 다른 방문자와 공유돼요
+        </div>
+      )}
     </>
   );
 }

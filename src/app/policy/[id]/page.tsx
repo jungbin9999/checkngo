@@ -132,6 +132,7 @@ export default function PolicyDetailPage() {
   }
 
   const checkedCount = policy.required_documents.filter((d) => checklist[d]).length;
+  const [descMain, descIncome] = splitDescription(policy.description);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -235,10 +236,14 @@ export default function PolicyDetailPage() {
 
         {/* 설명 */}
         <Section title="정책 설명">
-          <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">
-            {policy.description}
-          </p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{descMain}</p>
         </Section>
+
+        {descIncome && (
+          <Section title="소득 기준 (원문)">
+            <p className="text-sm leading-relaxed text-slate-600">{descIncome}</p>
+          </Section>
+        )}
 
         {/* 신청하러 가기 */}
         <a
@@ -305,6 +310,14 @@ function BookmarkIcon({ filled, className }: { filled: boolean; className?: stri
 }
 
 // ---- 헬퍼 ----
+// 시드에서 description 끝에 " · 소득기준: <원문>"으로 붙여둔 소득 기준을 분리
+function splitDescription(desc: string): [string, string | null] {
+  const sep = ' · 소득기준: ';
+  const i = desc.indexOf(sep);
+  if (i === -1) return [desc.trim(), null];
+  return [desc.slice(0, i).trim(), desc.slice(i + sep.length).trim()];
+}
+
 function condText(arr: string[] | null): string {
   if (!arr || arr.length === 0) return '제한없음';
   if (arr.includes('제한없음')) return '제한없음';

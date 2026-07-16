@@ -226,7 +226,19 @@ export default function CalendarPage() {
                             >
                               {d}
                             </div>
-                            <div className="space-y-0.5">
+                            {/* 모바일: 점 표시만 (상세는 아래 월별 리스트에서) */}
+                            <div className="flex flex-wrap gap-0.5 sm:hidden">
+                              {dayPolicies.slice(0, 5).map((p) => (
+                                <span
+                                  key={p.policy_id}
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    p.category === '국가단위' ? 'bg-sky-400' : 'bg-violet-400'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            {/* 데스크톱: 정책 목록 */}
+                            <div className="hidden space-y-0.5 sm:block">
                               {dayPolicies.map((p) => {
                                 const on = scrapped.has(p.policy_id);
                                 return (
