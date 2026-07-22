@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase, getValidSession } from '@/lib/supabase';
 import { Header } from '@/components/Header';
 import {
   getPolicies,
@@ -34,31 +34,43 @@ export default function CalendarPage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      // 만료 토큰 대비: 저장된 세션이 만료/임박이면 쿼리 전에 미리 갱신한다.
+      const session = await getValidSession();
       const uid = session?.user.id ?? null;
-      try {
-        const [pols, profRes, scrapRes] = await Promise.all([
-          getPolicies(),
-          uid
-            ? supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
-            : Promise.resolve({ data: null }),
-          uid
-            ? supabase.from('scraps').select('policy_id').eq('user_id', uid)
-            : Promise.resolve({ data: [] }),
-        ]);
-        if (!active) return;
-        setUserId(uid);
-        setPolicies(pols);
-        setProfile((profRes.data as UserProfile | null) ?? null);
-        setScrapped(
-          new Set(((scrapRes.data as { policy_id: string }[] | null) ?? []).map((s) => s.policy_id)),
-        );
-      } catch {
-        if (active) setError('데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
-      } finally {
-        if (active) setLoading(false);
+
+      // 콜드 로드 첫 요청이 만료 토큰 등으로 실패하면 강제 갱신 후 재시도한다.
+      const maxAttempts = 4;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const [pols, profRes, scrapRes] = await Promise.all([
+            getPolicies(),
+            uid
+              ? supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
+              : Promise.resolve({ data: null }),
+            uid
+              ? supabase.from('scraps').select('policy_id').eq('user_id', uid)
+              : Promise.resolve({ data: [] }),
+          ]);
+          if (!active) return;
+          setUserId(uid);
+          setPolicies(pols);
+          setProfile((profRes.data as UserProfile | null) ?? null);
+          setScrapped(
+            new Set(((scrapRes.data as { policy_id: string }[] | null) ?? []).map((s) => s.policy_id)),
+          );
+          setError(null);
+          setLoading(false);
+          return;
+        } catch {
+          if (!active) return;
+          if (attempt < maxAttempts) {
+            await supabase.auth.refreshSession();
+            await new Promise((r) => setTimeout(r, 300 * attempt));
+            continue;
+          }
+          setError('데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+          setLoading(false);
+        }
       }
     })();
     return () => {

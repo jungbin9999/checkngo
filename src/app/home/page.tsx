@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase, getValidSession } from '@/lib/supabase';
 import { Header } from '@/components/Header';
 import {
   getPolicies,
@@ -34,9 +34,8 @@ export default function HomePage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      // 만료 토큰 대비: 저장된 세션이 만료/임박이면 쿼리 전에 미리 갱신한다.
+      const session = await getValidSession();
       if (!session) {
         router.replace('/login');
         return;
@@ -44,8 +43,8 @@ export default function HomePage() {
       if (!active) return;
       setChecking(false);
 
-      // 로그인 직후 세션/토큰이 정착되기 전 첫 요청이 간헐적으로 실패하는 레이스가 있어
-      // (새로고침하면 정상) 짧은 백오프로 몇 차례 자동 재시도한다.
+      // 콜드 로드 시 첫 요청이 만료 토큰/세션 정착 지연으로 실패할 수 있어,
+      // 실패하면 세션을 강제 갱신하고 짧은 백오프로 재시도한다(수동 새로고침 자동화).
       const maxAttempts = 4;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
@@ -62,6 +61,7 @@ export default function HomePage() {
         } catch {
           if (!active) return;
           if (attempt < maxAttempts) {
+            await supabase.auth.refreshSession();
             await new Promise((r) => setTimeout(r, 300 * attempt));
             continue;
           }

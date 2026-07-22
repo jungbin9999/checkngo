@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase, getValidSession } from '@/lib/supabase';
 import {
   computeAgeRange,
   type EmploymentStatus,
@@ -56,9 +56,8 @@ export default function ProfilePage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      // 만료 토큰 대비: 저장된 세션이 만료/임박이면 쿼리 전에 미리 갱신한다.
+      const session = await getValidSession();
       if (!session) {
         router.replace('/login');
         return;
