@@ -44,18 +44,30 @@ export default function HomePage() {
       if (!active) return;
       setChecking(false);
 
-      try {
-        const [pols, profRes] = await Promise.all([
-          getPolicies(),
-          supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
-        ]);
-        if (!active) return;
-        setPolicies(pols);
-        setProfile((profRes.data as UserProfile | null) ?? null);
-      } catch {
-        if (active) setError('정책 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
-      } finally {
-        if (active) setLoadingData(false);
+      // 로그인 직후 세션/토큰이 정착되기 전 첫 요청이 간헐적으로 실패하는 레이스가 있어
+      // (새로고침하면 정상) 짧은 백오프로 몇 차례 자동 재시도한다.
+      const maxAttempts = 4;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const [pols, profRes] = await Promise.all([
+            getPolicies(),
+            supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
+          ]);
+          if (!active) return;
+          setPolicies(pols);
+          setProfile((profRes.data as UserProfile | null) ?? null);
+          setError(null);
+          setLoadingData(false);
+          return;
+        } catch {
+          if (!active) return;
+          if (attempt < maxAttempts) {
+            await new Promise((r) => setTimeout(r, 300 * attempt));
+            continue;
+          }
+          setError('정책 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+          setLoadingData(false);
+        }
       }
     })();
     return () => {

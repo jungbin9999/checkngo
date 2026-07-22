@@ -30,6 +30,14 @@ export default function LoginPage() {
 
   const isSignup = mode === 'signup';
 
+  // 로그인 직후엔 SPA 이동(router.push) 대신 하드 내비게이션으로 홈을 연다.
+  // 같은 JS 컨텍스트에서 곧바로 홈이 쿼리를 쏘면 Supabase 인증 잠금/세션 정착과
+  // 충돌해 첫 정책 조회가 간헐적으로 실패하는데, 전체 재로드하면 클라이언트가
+  // localStorage 세션을 새로 읽어 항상 정상 동작한다(새로고침하면 되는 것과 동일).
+  function goHome() {
+    window.location.assign('/home');
+  }
+
   function switchMode(next: Mode) {
     setMode(next);
     setMessage(null);
@@ -60,7 +68,7 @@ export default function LoginPage() {
         if (error) {
           setMessage({ type: 'error', text: error.message });
         } else if (data.session) {
-          router.push('/home');
+          goHome();
         } else {
           setMessage({
             type: 'info',
@@ -72,7 +80,7 @@ export default function LoginPage() {
         if (error) {
           setMessage({ type: 'error', text: '이메일 또는 비밀번호를 다시 확인해 주세요.' });
         } else {
-          router.push('/home');
+          goHome();
         }
       }
     } catch (err) {
@@ -97,7 +105,7 @@ export default function LoginPage() {
       setLoading(false);
       setMessage({ type: 'error', text: '데모 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.' });
     } else {
-      router.push('/home');
+      goHome();
     }
   }
 
